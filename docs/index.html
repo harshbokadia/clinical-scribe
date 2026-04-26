@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Clinical Scribe — AI-Powered Clinical Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #060A12;
+  --surface: #0C1220;
+  --surface-2: #111826;
+  --border: #1A2236;
+  --border-2: #243050;
+  --cyan: #00D4F0;
+  --cyan-2: rgba(0,212,240,0.08);
+  --cyan-3: rgba(0,212,240,0.15);
+  --text: #E8F0FF;
+  --text-2: #6B7FA3;
+  --text-3: #2E3D5C;
+  --green: #00E5A0;
+  --amber: #FFB340;
+  --red: #FF4D6A;
+  --serif: 'DM Serif Display', serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Instrument Sans', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { text-decoration: none; color: inherit; }
+
+/* ── Grid overlay ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,240,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,240,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 60px;
+  background: rgba(6,10,18,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--serif);
+  font-size: 18px;
+  color: var(--text);
+}
+.nav-logo-mark {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  background: var(--cyan);
+  display: flex; align-items: center; justify-content: center;
+  color: #060A12;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 13px;
+  color: var(--text-2);
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-cta {
+  padding: 8px 20px;
+  background: var(--cyan);
+  color: #060A12;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.nav-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 40px 80px;
+  text-align: center;
+}
+.hero-glow {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(ellipse, rgba(0,212,240,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-2);
+  letter-spacing: 0.5px;
+  margin-bottom: 2rem;
+  animation: fade-up 0.6s ease both;
+}
+.rec-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  animation: blink 1.4s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+.hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(48px, 7vw, 88px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+  animation: fade-up 0.6s 0.1s ease both;
+}
+.hero h1 em {
+  font-style: italic;
+  color: var(--cyan);
+}
+.hero-sub {
+  font-size: 18px;
+  color: var(--text-2);
+  line-height: 1.7;
+  max-width: 540px;
+  margin: 0 auto 2.5rem;
+  animation: fade-up 0.6s 0.2s ease both;
+}
+.hero-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  animation: fade-up 0.6s 0.3s ease both;
+}
+.btn-hero {
+  padding: 13px 28px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  font-family: var(--sans);
+}
+.btn-hero-primary {
+  background: var(--cyan);
+  color: #060A12;
+}
+.btn-hero-primary:hover { opacity: 0.88; transform: translateY(-2px); }
+.btn-hero-secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border-2);
+}
+.btn-hero-secondary:hover { background: var(--surface); border-color: var(--border-2); }
+.hero-scroll {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: fade-up 0.6s 0.5s ease both;
+}
+.scroll-line {
+  width: 1px;
+  height: 48px;
+  background: linear-gradient(to bottom, var(--cyan), transparent);
+  animation: scroll-pulse 2s ease-in-out infinite;
+}
+@keyframes scroll-pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+.scroll-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 2px;
+  writing-mode: vertical-lr;
+}
+
+/* ── STATS ── */
+.stats {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.stat {
+  padding: 48px 40px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+}
+.stat:last-child { border-right: none; }
+.stat-num {
+  font-family: var(--serif);
+  font-size: 56px;
+  font-weight: 400;
+  color: var(--cyan);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.stat-label {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+/* ── SECTIONS ── */
+section {
+  position: relative;
+  z-index: 1;
+  padding: 100px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.section-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--cyan);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: var(--serif);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  margin-bottom: 16px;
+}
+.section-sub {
+  font-size: 16px;
+  color: var(--text-2);
+  line-height: 1.7;
+  max-width: 520px;
+  margin-bottom: 56px;
+}
+
+/* ── HOW IT WORKS ── */
+.pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.pipe-step {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 0 28px;
+  align-items: start;
+  padding: 32px 0;
+  border-bottom: 1px solid var(--border);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.pipe-step.visible { opacity: 1; transform: translateY(0); }
+.pipe-step:last-child { border-bottom: none; }
+.pipe-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 1px;
+  padding-top: 4px;
+  text-align: right;
+}
+.pipe-content {}
+.pipe-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.pipe-desc {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+.pipe-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--cyan);
+  letter-spacing: 0.3px;
+}
+
+/* ── FEATURES ── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.feature {
+  background: var(--bg);
+  padding: 36px 32px;
+  transition: background 0.2s;
+}
+.feature:hover { background: var(--surface); }
+.feature-icon {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  background: var(--cyan-2);
+  border: 1px solid var(--cyan-3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+.feature h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.feature p {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.7;
+}
+
+/* ── NOTE PREVIEW ── */
+.note-demo {
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 16px;
+  overflow: hidden;
+  font-family: var(--mono);
+}
+.note-demo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.note-demo-dots { display: flex; gap: 6px; }
+.note-demo-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+.note-demo-title {
+  font-size: 11px;
+  color: var(--text-2);
+  letter-spacing: 1px;
+}
+.note-demo-status {
+  font-size: 10px;
+  color: var(--green);
+  background: rgba(0,229,160,0.1);
+  border: 1px solid rgba(0,229,160,0.2);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.note-demo-body {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.note-field {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+.note-field-label {
+  font-size: 9px;
+  color: var(--text-3);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.note-field-value {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.6;
+}
+.note-field-value.diagnosis { color: var(--cyan); font-size: 13px; }
+.note-field-value li {
+  list-style: none;
+  padding-left: 12px;
+  position: relative;
+  margin-bottom: 2px;
+}
+.note-field-value li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--text-3);
+}
+.med-block {
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+}
+.med-name { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.med-detail { font-size: 10px; color: var(--text-2); }
+
+/* ── STACK ── */
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.stack-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 20px 16px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.stack-card:hover {
+  border-color: var(--border-2);
+  background: var(--surface-2);
+}
+.stack-role {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.stack-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.stack-desc {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+/* ── CTA ── */
+.cta-section {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 100px 40px;
+  text-align: center;
+  overflow: hidden;
+}
+.cta-glow {
+  position: absolute;
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+  height: 300px;
+  background: radial-gradient(ellipse, rgba(0,212,240,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-section h2 {
+  font-family: var(--serif);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.1;
+  margin-bottom: 1rem;
+  letter-spacing: -0.5px;
+}
+.cta-section p {
+  font-size: 16px;
+  color: var(--text-2);
+  margin-bottom: 2.5rem;
+}
+.cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── FOOTER ── */
+footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--border);
+  padding: 32px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.footer-name {
+  font-size: 13px;
+  color: var(--text-2);
+}
+.footer-name a { color: var(--cyan); }
+.footer-links {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+}
+.footer-links a {
+  font-size: 13px;
+  color: var(--text-2);
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--text); }
+
+/* ── ANIMATIONS ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-mark">Cs</div>
+    Clinical Scribe
+  </div>
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="https://github.com/harshbokadia/clinical-scribe" target="_blank" class="nav-cta">GitHub →</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge"><span class="rec-dot"></span> Open source · Built with LiveKit + Deepgram + Groq</div>
+  <h1>The doctor speaks.<br><em>The note writes itself.</em></h1>
+  <p class="hero-sub">An AI agent that listens silently to a clinical consultation, transcribes it in real time, and generates a fully structured doctor's note the moment the session ends.</p>
+  <div class="hero-buttons">
+    <a href="https://github.com/harshbokadia/clinical-scribe" target="_blank" class="btn-hero btn-hero-primary">View on GitHub</a>
+    <a href="#how" class="btn-hero btn-hero-secondary">See how it works</a>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span class="scroll-label">scroll</span>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat reveal">
+    <div class="stat-num">40%</div>
+    <div class="stat-label">of a doctor's time<br>lost to documentation</div>
+  </div>
+  <div class="stat reveal">
+    <div class="stat-num">0s</div>
+    <div class="stat-label">typing required<br>with Clinical Scribe</div>
+  </div>
+  <div class="stat reveal">
+    <div class="stat-num">100%</div>
+    <div class="stat-label">verifiable — doctor<br>reviews and signs off</div>
+  </div>
+</div>
+
+<section id="how">
+  <p class="section-eyebrow reveal">How it works</p>
+  <h2 class="section-title reveal">One pipeline.<br>From voice to document.</h2>
+  <p class="section-sub reveal">The doctor speaks naturally. Every other step is handled automatically.</p>
+  <div class="pipeline">
+    <div class="pipe-step">
+      <div class="pipe-num">01</div>
+      <div class="pipe-content">
+        <div class="pipe-title">Doctor joins a LiveKit room</div>
+        <div class="pipe-desc">The browser connects to a LiveKit room and begins streaming audio. No additional hardware required — just a microphone.</div>
+        <span class="pipe-tag">LiveKit WebRTC</span>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">02</div>
+      <div class="pipe-content">
+        <div class="pipe-title">The agent listens silently</div>
+        <div class="pipe-desc">A Python worker subscribes to the audio track and forwards every frame to Deepgram's medical-grade speech-to-text model. It never speaks, never interrupts.</div>
+        <span class="pipe-tag">Deepgram nova-2-medical</span>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">03</div>
+      <div class="pipe-content">
+        <div class="pipe-title">Transcript streams live to the UI</div>
+        <div class="pipe-desc">Each recognised segment is pushed via WebSocket to the React frontend in real time. The doctor can watch the transcription build as they speak.</div>
+        <span class="pipe-tag">FastAPI · WebSocket</span>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">04</div>
+      <div class="pipe-content">
+        <div class="pipe-title">Note is generated on session end</div>
+        <div class="pipe-desc">The full transcript is sent to Groq's LLaMA 3.3 70B model with a strict clinical prompt. It extracts symptoms, diagnosis, medications with dosages, precautions, and follow-up into a typed JSON structure.</div>
+        <span class="pipe-tag">Groq · LLaMA 3.3 70B</span>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">05</div>
+      <div class="pipe-content">
+        <div class="pipe-title">Doctor reviews and downloads</div>
+        <div class="pipe-desc">The structured note renders instantly on the right panel. One click exports a professionally formatted PDF or DOCX ready for review, signature, and filing.</div>
+        <span class="pipe-tag">ReportLab · python-docx</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features" style="border-top: 1px solid var(--border); max-width:100%; padding: 100px 40px;">
+  <div style="max-width:1100px; margin:0 auto;">
+    <p class="section-eyebrow reveal">Features</p>
+    <h2 class="section-title reveal">Built for real clinical workflows.</h2>
+    <p class="section-sub reveal">Every design decision was made with a real consultation in mind.</p>
+    <div class="features-grid reveal">
+      <div class="feature">
+        <div class="feature-icon">🎙</div>
+        <h3>Purely observant agent</h3>
+        <p>The agent never speaks, asks questions, or interferes. It exists only to listen — hands off, always.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <h3>Medical-grade transcription</h3>
+        <p>Deepgram's nova-2-medical model is trained on clinical speech, handling drug names, dosages, and symptoms accurately.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📋</div>
+        <h3>Structured SOAP notes</h3>
+        <p>Chief complaint, symptoms, observations, diagnosis, medications, precautions, healthy practices, and follow-up — all extracted automatically.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔒</div>
+        <h3>No hallucinated dosages</h3>
+        <p>The prompt explicitly instructs the model to leave dosage fields null if not stated. Nothing is inferred or invented.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📄</div>
+        <h3>PDF & DOCX export</h3>
+        <p>One-click download of a professionally formatted note with headers, medication tables, and a physician sign-off disclaimer.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🌐</div>
+        <h3>Real-time split panel UI</h3>
+        <p>Live transcript streams on the left, structured note builds on the right. Recording timer, generation spinner, export buttons — all with distinct states.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="border-top: 1px solid var(--border);">
+  <p class="section-eyebrow reveal">Output</p>
+  <h2 class="section-title reveal">A note that takes 15 minutes<br>to write, in seconds.</h2>
+  <p class="section-sub reveal">Generated from natural conversation. No forms. No templates. Just speech.</p>
+  <div class="note-demo reveal">
+    <div class="note-demo-header">
+      <div class="note-demo-dots">
+        <div class="note-demo-dot" style="background:#FF4D6A"></div>
+        <div class="note-demo-dot" style="background:#FFB340"></div>
+        <div class="note-demo-dot" style="background:#00E5A0"></div>
+      </div>
+      <div class="note-demo-title">CLINICAL CONSULTATION NOTE</div>
+      <div class="note-demo-status">✓ Ready for review</div>
+    </div>
+    <div class="note-demo-body">
+      <div class="note-field">
+        <div class="note-field-label">Chief complaint</div>
+        <div class="note-field-value">Patient presents with persistent fever and productive cough lasting 4 days.</div>
+      </div>
+      <div class="note-field">
+        <div class="note-field-label">Diagnosis</div>
+        <div class="note-field-value diagnosis">Community-acquired pneumonia</div>
+      </div>
+      <div class="note-field">
+        <div class="note-field-label">Symptoms</div>
+        <div class="note-field-value"><ul><li>Fever — 102°F</li><li>Productive cough</li><li>Shortness of breath</li><li>Chest discomfort on inspiration</li></ul></div>
+      </div>
+      <div class="note-field">
+        <div class="note-field-label">Medications</div>
+        <div class="note-field-value">
+          <div class="med-block"><div class="med-name">Amoxicillin 500mg</div><div class="med-detail">3× daily · 7 days</div></div>
+          <div class="med-block"><div class="med-name">Paracetamol 650mg</div><div class="med-detail">As needed · max 4 per day</div></div>
+        </div>
+      </div>
+      <div class="note-field">
+        <div class="note-field-label">Precautions</div>
+        <div class="note-field-value"><ul><li>Avoid cold beverages</li><li>No strenuous activity for 1 week</li><li>Complete full antibiotic course</li></ul></div>
+      </div>
+      <div class="note-field">
+        <div class="note-field-label">Follow-up</div>
+        <div class="note-field-value" style="color:var(--green)">Review in 7 days or sooner if symptoms worsen.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="stack">
+  <p class="section-eyebrow reveal">Tech stack</p>
+  <h2 class="section-title reveal">Every layer chosen deliberately.</h2>
+  <p class="section-sub reveal">No bloat. Each tool does exactly one job and does it well.</p>
+  <div class="stack-grid reveal">
+    <div class="stack-card">
+      <div class="stack-role">Audio streaming</div>
+      <div class="stack-name">LiveKit</div>
+      <div class="stack-desc">WebRTC room management. Real-time low-latency audio without building infrastructure from scratch.</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-role">Speech-to-text</div>
+      <div class="stack-name">Deepgram nova-2-medical</div>
+      <div class="stack-desc">Purpose-built for clinical vocabulary. Dramatically better accuracy on drug names and medical terminology.</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-role">Note generation</div>
+      <div class="stack-name">Groq · LLaMA 3.3 70B</div>
+      <div class="stack-desc">Fast inference. Strict JSON output mode ensures the note is always parseable and never hallucinated.</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-role">Backend</div>
+      <div class="stack-name">FastAPI · Python</div>
+      <div class="stack-desc">Token issuance, WebSocket broadcasting, note generation orchestration, and file export endpoints.</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-role">Frontend</div>
+      <div class="stack-name">React · Vite</div>
+      <div class="stack-desc">Live split-panel UI. Transcript streams in real time via WebSocket. Export buttons with distinct loading states.</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-role">Document export</div>
+      <div class="stack-name">ReportLab · python-docx</div>
+      <div class="stack-desc">Professionally formatted PDF and DOCX output with clinical headers, medication tables, and sign-off disclaimer.</div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-section">
+  <div class="cta-glow"></div>
+  <h2>Ready to run it yourself?</h2>
+  <p>Three terminals, five minutes, and you have a working clinical scribe.</p>
+  <div class="cta-buttons">
+    <a href="https://github.com/harshbokadia/clinical-scribe" target="_blank" class="btn-hero btn-hero-primary">Clone on GitHub</a>
+    <a href="https://linkedin.com/in/-harsh-bokadia/" target="_blank" class="btn-hero btn-hero-secondary">Connect with the builder</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-left">
+    <div class="nav-logo-mark" style="width:24px;height:24px;font-size:11px">Cs</div>
+    <span class="footer-name">Built by <a href="https://linkedin.com/in/-harsh-bokadia/" target="_blank">Harsh Bokadia</a></span>
+  </div>
+  <ul class="footer-links">
+    <li><a href="https://github.com/harshbokadia/clinical-scribe" target="_blank">GitHub</a></li>
+    <li><a href="https://linkedin.com/in/-harsh-bokadia/" target="_blank">LinkedIn</a></li>
+  </ul>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal, .pipe-step').forEach(el => {
+  observer.observe(el);
+});
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>
