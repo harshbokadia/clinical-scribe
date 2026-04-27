@@ -9,20 +9,24 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
 :root {
-  --bg: #060A12;
-  --surface: #0C1220;
-  --surface-2: #111826;
-  --border: #1A2236;
-  --border-2: #243050;
-  --cyan: #00D4F0;
-  --cyan-2: rgba(0,212,240,0.08);
-  --cyan-3: rgba(0,212,240,0.15);
-  --text: #E8F0FF;
-  --text-2: #6B7FA3;
-  --text-3: #2E3D5C;
-  --green: #00E5A0;
-  --amber: #FFB340;
-  --red: #FF4D6A;
+  --bg: #F5EEF8;
+  --surface: rgba(255,255,255,0.75);
+  --surface-2: rgba(255,255,255,0.55);
+  --border: rgba(180,160,210,0.25);
+  --border-2: rgba(150,130,190,0.35);
+  --cyan: #4BA8C8;
+  --cyan-2: rgba(75,168,200,0.12);
+  --cyan-3: rgba(75,168,200,0.22);
+  --text: #2D2044;
+  --text-2: #6B5A8A;
+  --text-3: #B0A0C8;
+  --green: #5DBE8A;
+  --amber: #F0A050;
+  --red: #E86070;
+  --mint: #A8DDD0;
+  --lavender: #C5B8E8;
+  --peach: #F5C4A8;
+  --baby-blue: #A8CEE8;
   --serif: 'DM Serif Display', serif;
   --mono: 'IBM Plex Mono', monospace;
   --sans: 'Instrument Sans', sans-serif;
@@ -38,15 +42,33 @@ body {
 }
 a { text-decoration: none; color: inherit; }
 
-/* ── Grid overlay ── */
+/* ── Pastel blob background ── */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
+  background:
+    radial-gradient(ellipse 55% 45% at 8% 12%, rgba(168,221,208,0.55) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 50% at 92% 8%, rgba(197,184,232,0.55) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 45% at 85% 88%, rgba(245,196,168,0.55) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 12% 90%, rgba(168,206,232,0.55) 0%, transparent 65%),
+    radial-gradient(ellipse 35% 35% at 50% 50%, rgba(255,255,255,0.3) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Floating decorative circles (reference-inspired) ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
   background-image:
-    linear-gradient(rgba(0,212,240,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,212,240,0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
+    radial-gradient(circle 80px at 5% 20%, rgba(168,221,208,0.4) 0%, transparent 70%),
+    radial-gradient(circle 120px at 95% 15%, rgba(197,184,232,0.45) 0%, transparent 70%),
+    radial-gradient(circle 60px at 90% 80%, rgba(245,196,168,0.5) 0%, transparent 70%),
+    radial-gradient(circle 100px at 3% 85%, rgba(168,206,232,0.45) 0%, transparent 70%),
+    radial-gradient(circle 50px at 50% 5%, rgba(245,196,168,0.35) 0%, transparent 70%),
+    radial-gradient(circle 70px at 70% 95%, rgba(168,221,208,0.4) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
@@ -61,8 +83,8 @@ nav {
   justify-content: space-between;
   padding: 0 40px;
   height: 60px;
-  background: rgba(6,10,18,0.85);
-  backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
 }
 .nav-logo {
@@ -78,7 +100,7 @@ nav {
   border-radius: 6px;
   background: var(--cyan);
   display: flex; align-items: center; justify-content: center;
-  color: #060A12;
+  color: #fff;
   font-family: var(--mono);
   font-size: 13px;
   font-weight: 500;
@@ -98,7 +120,7 @@ nav {
 .nav-cta {
   padding: 8px 20px;
   background: var(--cyan);
-  color: #060A12;
+  color: #fff;
   font-size: 13px;
   font-weight: 600;
   border-radius: 6px;
@@ -125,14 +147,14 @@ nav {
   transform: translateX(-50%);
   width: 600px;
   height: 600px;
-  background: radial-gradient(ellipse, rgba(0,212,240,0.07) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(75,168,200,0.12) 0%, transparent 70%);
   pointer-events: none;
 }
 .hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--surface);
+  background: rgba(255,255,255,0.8);
   border: 1px solid var(--border-2);
   border-radius: 20px;
   padding: 6px 16px;
@@ -142,6 +164,7 @@ nav {
   letter-spacing: 0.5px;
   margin-bottom: 2rem;
   animation: fade-up 0.6s ease both;
+  backdrop-filter: blur(8px);
 }
 .rec-dot {
   width: 6px; height: 6px;
@@ -191,15 +214,16 @@ nav {
 }
 .btn-hero-primary {
   background: var(--cyan);
-  color: #060A12;
+  color: #fff;
 }
 .btn-hero-primary:hover { opacity: 0.88; transform: translateY(-2px); }
 .btn-hero-secondary {
-  background: transparent;
+  background: rgba(255,255,255,0.7);
   color: var(--text);
   border: 1px solid var(--border-2);
+  backdrop-filter: blur(8px);
 }
-.btn-hero-secondary:hover { background: var(--surface); border-color: var(--border-2); }
+.btn-hero-secondary:hover { background: rgba(255,255,255,0.9); border-color: var(--border-2); }
 .hero-scroll {
   position: absolute;
   bottom: 40px;
@@ -234,6 +258,8 @@ nav {
   border-bottom: 1px solid var(--border);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(12px);
 }
 .stat {
   padding: 48px 40px;
@@ -331,7 +357,7 @@ section {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--surface);
+  background: rgba(255,255,255,0.75);
   border: 1px solid var(--border-2);
   border-radius: 4px;
   padding: 4px 10px;
@@ -352,11 +378,12 @@ section {
   overflow: hidden;
 }
 .feature {
-  background: var(--bg);
+  background: rgba(255,255,255,0.6);
   padding: 36px 32px;
   transition: background 0.2s;
+  backdrop-filter: blur(8px);
 }
-.feature:hover { background: var(--surface); }
+.feature:hover { background: rgba(255,255,255,0.9); }
 .feature-icon {
   width: 40px; height: 40px;
   border-radius: 8px;
@@ -380,11 +407,12 @@ section {
 
 /* ── NOTE PREVIEW ── */
 .note-demo {
-  background: var(--surface);
+  background: rgba(255,255,255,0.75);
   border: 1px solid var(--border-2);
   border-radius: 16px;
   overflow: hidden;
   font-family: var(--mono);
+  backdrop-filter: blur(12px);
 }
 .note-demo-header {
   display: flex;
@@ -392,7 +420,7 @@ section {
   justify-content: space-between;
   padding: 16px 24px;
   border-bottom: 1px solid var(--border);
-  background: var(--surface-2);
+  background: rgba(255,255,255,0.6);
 }
 .note-demo-dots { display: flex; gap: 6px; }
 .note-demo-dot {
@@ -419,7 +447,7 @@ section {
   gap: 12px;
 }
 .note-field {
-  background: var(--surface-2);
+  background: rgba(255,255,255,0.7);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 14px 16px;
@@ -436,7 +464,7 @@ section {
   color: var(--text);
   line-height: 1.6;
 }
-.note-field-value.diagnosis { color: var(--cyan); font-size: 13px; }
+.note-field-value.diagnosis { color: var(--cyan); font-size: 13px; font-weight:600; }
 .note-field-value li {
   list-style: none;
   padding-left: 12px;
@@ -450,7 +478,7 @@ section {
   color: var(--text-3);
 }
 .med-block {
-  background: var(--surface);
+  background: rgba(255,255,255,0.8);
   border: 1px solid var(--border-2);
   border-radius: 6px;
   padding: 8px 10px;
@@ -466,15 +494,16 @@ section {
   gap: 12px;
 }
 .stack-card {
-  background: var(--surface);
+  background: rgba(255,255,255,0.65);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 20px 20px 16px;
   transition: border-color 0.2s, background 0.2s;
+  backdrop-filter: blur(8px);
 }
 .stack-card:hover {
   border-color: var(--border-2);
-  background: var(--surface-2);
+  background: rgba(255,255,255,0.9);
 }
 .stack-role {
   font-family: var(--mono);
@@ -501,7 +530,8 @@ section {
   position: relative;
   z-index: 1;
   border-top: 1px solid var(--border);
-  background: var(--surface);
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(16px);
   padding: 100px 40px;
   text-align: center;
   overflow: hidden;
@@ -513,7 +543,7 @@ section {
   transform: translateX(-50%);
   width: 500px;
   height: 300px;
-  background: radial-gradient(ellipse, rgba(0,212,240,0.06) 0%, transparent 70%);
+  background: radial-gradient(ellipse, rgba(75,168,200,0.1) 0%, transparent 70%);
   pointer-events: none;
 }
 .cta-section h2 {
@@ -546,6 +576,8 @@ footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(12px);
 }
 .footer-left {
   display: flex;
@@ -603,7 +635,7 @@ footer {
   <h1>The doctor speaks.<br><em>The note writes itself.</em></h1>
   <p class="hero-sub">An AI agent that listens silently to a clinical consultation, transcribes it in real time, and generates a fully structured doctor's note the moment the session ends.</p>
   <div class="hero-buttons">
-    <a href="https://clinical-scribe-five.vercel.app" target="_blank" class="btn-hero btn-hero-primary">Launch Clinical Scribe →</a>
+    <a href="https://github.com/harshbokadia/clinical-scribe" target="_blank" class="btn-hero btn-hero-primary">View on GitHub</a>
     <a href="#how" class="btn-hero btn-hero-secondary">See how it works</a>
   </div>
   <div class="hero-scroll">
@@ -811,7 +843,7 @@ footer {
 
 <footer>
   <div class="footer-left">
-    <div class="nav-logo-mark" style="width:24px;height:24px;font-size:11px">Cs</div>
+    <div class="nav-logo-mark" style="width:24px;height:24px;font-size:11px;color:#fff">Cs</div>
     <span class="footer-name">Built by <a href="https://linkedin.com/in/-harsh-bokadia/" target="_blank">Harsh Bokadia</a></span>
   </div>
   <ul class="footer-links">
