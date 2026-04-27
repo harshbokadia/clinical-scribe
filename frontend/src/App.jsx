@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { LiveKitRoom, useLocalParticipant, RoomAudioRenderer } from "@livekit/components-react";
 
-const API = "http://localhost:8000";
+const API = "https://clinical-scribe-api.onrender.com";
 const ROOM_NAME = "consultation-room";
 
 function generateParticipantName() {
@@ -82,7 +82,8 @@ function ScribeInterface({ participantName }) {
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
-    const ws = new WebSocket(`ws://localhost:8000/ws/${ROOM_NAME}`);
+    const wsUrl = API.replace("https://", "wss://").replace("http://", "ws://");
+    const ws = new WebSocket(`${wsUrl}/ws/${ROOM_NAME}`);
     wsRef.current = ws;
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
@@ -264,22 +265,18 @@ function NoteView({ note }) {
       <NoteSection title="Chief Complaint" icon="◎">
         <p className="note-text">{note.chief_complaint || "Not recorded"}</p>
       </NoteSection>
-
       <NoteSection title="Symptoms" icon="◈">
         <ul className="note-list">
           {(note.symptoms || []).map((s, i) => <li key={i}>{s}</li>)}
           {(!note.symptoms || note.symptoms.length === 0) && <li className="muted">None recorded</li>}
         </ul>
       </NoteSection>
-
       <NoteSection title="Clinical Observations" icon="◉">
         <p className="note-text">{note.clinical_observations || "None recorded"}</p>
       </NoteSection>
-
       <NoteSection title="Diagnosis" icon="◆">
         <p className="note-text diagnosis">{note.diagnosis || "Not stated"}</p>
       </NoteSection>
-
       <NoteSection title="Medications" icon="⊕">
         {(note.medications || []).length > 0 ? (
           <div className="med-list">
@@ -298,21 +295,18 @@ function NoteView({ note }) {
           <p className="muted">No medications prescribed</p>
         )}
       </NoteSection>
-
       <NoteSection title="Precautions" icon="◌">
         <ul className="note-list">
           {(note.precautions || []).map((p, i) => <li key={i}>{p}</li>)}
           {(!note.precautions || note.precautions.length === 0) && <li className="muted">None recorded</li>}
         </ul>
       </NoteSection>
-
       <NoteSection title="Healthy Practices" icon="◎">
         <ul className="note-list">
           {(note.healthy_practices || []).map((p, i) => <li key={i}>{p}</li>)}
           {(!note.healthy_practices || note.healthy_practices.length === 0) && <li className="muted">None recorded</li>}
         </ul>
       </NoteSection>
-
       {note.follow_up && note.follow_up !== "null" && (
         <NoteSection title="Follow-Up" icon="→">
           <p className="note-text followup">{note.follow_up}</p>
