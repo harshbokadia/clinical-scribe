@@ -2,7 +2,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { LiveKitRoom, useLocalParticipant, RoomAudioRenderer } from "@livekit/components-react";
 
 const API = "https://clinical-scribe-api.onrender.com";
-const ROOM_NAME = "consultation-room";
+
+function generateRoomName() {
+  return `consultation-${Math.random().toString(36).slice(2, 10)}-${Date.now()}`;
+}
 
 function generateParticipantName() {
   return `Doctor-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
@@ -12,6 +15,7 @@ export default function App() {
   const [token, setToken] = useState(null);
   const [liveKitUrl, setLiveKitUrl] = useState(null);
   const [participantName] = useState(generateParticipantName);
+  const [roomName] = useState(generateRoomName);
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -22,7 +26,7 @@ export default function App() {
       const res = await fetch(`${API}/token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ room_name: ROOM_NAME, participant_name: participantName }),
+        body: JSON.stringify({ room_name: roomName, participant_name: participantName }),
       });
       if (!res.ok) throw new Error("Failed to get token.");
       const data = await res.json();
@@ -64,12 +68,12 @@ export default function App() {
       onDisconnected={() => { setToken(null); setLiveKitUrl(null); }}
     >
       <RoomAudioRenderer />
-      <ScribeInterface participantName={participantName} />
+      <ScribeInterface participantName={participantName} roomName={roomName} />
     </LiveKitRoom>
   );
 }
 
-function ScribeInterface({ participantName }) {
+function ScribeInterface({ participantName, roomName }) {
   const { localParticipant } = useLocalParticipant();
   const [transcript, setTranscript] = useState([]);
   const [note, setNote] = useState(null);
@@ -83,7 +87,7 @@ function ScribeInterface({ participantName }) {
 
   useEffect(() => {
     const wsUrl = API.replace("https://", "wss://").replace("http://", "ws://");
-    const ws = new WebSocket(`${wsUrl}/ws/${ROOM_NAME}`);
+    const ws = new WebSocket(`${wsUrl}/ws/${roomName}`);
     wsRef.current = ws;
     ws.onmessage = (e) => {
       const msg = JSON.parse(e.data);
@@ -122,7 +126,7 @@ function ScribeInterface({ participantName }) {
       const res = await fetch(`${API}/generate-note`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ room: ROOM_NAME }),
+        body: JSON.stringify({ room: roomName }),
       });
       if (!res.ok) throw new Error("Note generation failed.");
       const data = await res.json();
@@ -142,7 +146,7 @@ function ScribeInterface({ participantName }) {
       const res = await fetch(`${API}/export/${format}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ room: ROOM_NAME }),
+        body: JSON.stringify({ room: roomName }),
       });
       if (!res.ok) throw new Error("Export failed.");
       const blob = await res.blob();
@@ -166,7 +170,7 @@ function ScribeInterface({ participantName }) {
           <span className="logo-small">✦</span>
           <span className="header-title">Clinical Scribe</span>
           <span className="divider">|</span>
-          <span className="header-room">{ROOM_NAME}</span>
+          <span className="header-room">{roomName.slice(0, 20)}…</span>
         </div>
         <div className="header-center">
           {phase === "recording" && (
